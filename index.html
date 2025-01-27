@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Sensores con Fallo</title>
+</head>
+
+<body>
+    <h1>Sensores con Estado Fallo</h1>
+    <table id="sensorsTable">
+        <thead>
+            <tr>
+                <th>Sensor</th>
+                <th>Dispositivo</th>
+                <th>Estado</th>
+                <th>Último Valor</th>
+                <th>Mensaje</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td colspan="5">Cargando datos...</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        const API_URL = 'http://localhost:3000/prtg?sensors=fallo';
+
+        async function fetchSensors() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+
+                populateTable(data.sensors); // Llama a la función para llenar la tabla
+            } catch (error) {
+                console.error('Error al obtener los datos:', error);
+                const tableBody = document.querySelector('#sensorsTable tbody');
+                tableBody.innerHTML = '<tr><td colspan="5">Error al cargar los datos.</td></tr>';
+            }
+        }
+
+        function populateTable(sensors) {
+            const tableBody = document.querySelector('#sensorsTable tbody');
+            tableBody.innerHTML = ''; // Limpia la tabla antes de llenarla
+
+            sensors.forEach(sensor => {
+                const row = document.createElement('tr');
+                const statusClass = sensor.status.toLowerCase() === 'fallo' ? 'status-fallo' : '';
+
+                row.innerHTML = `
+            <td>${sensor.sensor}</td>
+            <td>${sensor.device}</td>
+            <td class="${statusClass}">${sensor.status}</td>
+            <td>${sensor.lastvalue || 'No disponible'}</td>
+            <td>${sensor.message || 'No disponible'}</td>
+        `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // Llama a la función para obtener y mostrar los datos al cargar la página
+        fetchSensors();
+    </script>
+</body>
+
+</html>
